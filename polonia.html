@@ -1,0 +1,211 @@
+```html
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Gênio Quiz - Imigração Polonesa no Brasil</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(135deg, #d4213d, #ffffff);
+      margin: 0;
+      padding: 0;
+      text-align: center;
+      color: #222;
+      overflow-x: hidden;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    h1 {
+      font-size: 2.8em;
+      text-shadow: 2px 2px 5px rgba(0,0,0,0.2);
+    }
+    .container {
+      margin: 40px auto;
+      width: 85%;
+      max-width: 700px;
+      background: white;
+      padding: 30px;
+      border-radius: 20px;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.25);
+      animation: fadeIn 1s ease-in-out;
+    }
+    button {
+      padding: 14px 20px;
+      border: none;
+      border-radius: 12px;
+      background: #d4213d;
+      color: white;
+      font-size: 1.2em;
+      cursor: pointer;
+      transition: transform 0.2s, background 0.3s;
+      margin-top: 10px;
+    }
+    button:hover {
+      background: #a5172e;
+      transform: scale(1.05);
+    }
+    .question {
+      font-size: 1.6em;
+      margin-bottom: 35px;
+      font-weight: bold;
+    }
+    .options {
+      display: flex;
+      flex-direction: column;
+      gap: 25px;
+    }
+    #result {
+      margin-top: 20px;
+      font-weight: bold;
+    }
+    .hidden {
+      display: none;
+    }
+    .final-score {
+      font-size: 1.6em;
+      color: green;
+      animation: fadeIn 0.8s ease-in-out;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+  <!-- Tela inicial -->
+  <div id="startScreen" class="container">
+    <h1>🇵🇱 Gênio Quiz - Imigração Polonesa no Brasil</h1>
+    <p>Teste seus conhecimentos sobre a história da imigração polonesa em nosso país.</p>
+    <button onclick="iniciarQuiz()">▶️ Iniciar Quiz</button>
+  </div>
+
+  <!-- Tela do quiz -->
+  <div id="quizScreen" class="container hidden">
+    <div id="quiz"></div>
+    <p id="result"></p>
+    <button id="nextBtn" class="hidden">Próxima Pergunta ➡️</button>
+    <button id="restartBtn" class="hidden">🔄 Reiniciar Quiz</button>
+  </div>
+
+  <script>
+    const perguntas = [
+      {
+        pergunta: "O primeiro polonês registrado em terras brasileiras foi:",
+        opcoes: ["Bronislau Rymkiewicz", "Adalberto Męciński", "Pedro Luís Chernoviz", "Alexandre Brodowski"],
+        correta: 1
+      },
+      {
+        pergunta: "Em qual ano começou a imigração polonesa organizada para o Brasil?",
+        opcoes: ["1822", "1869", "1889", "1918"],
+        correta: 1
+      },
+      {
+        pergunta: "Qual estado brasileiro recebeu o maior número de imigrantes poloneses no final do século XIX e início do XX?",
+        opcoes: ["Santa Catarina", "Paraná", "São Paulo", "Rio Grande do Sul"],
+        correta: 1
+      },
+      {
+        pergunta: "Verdadeiro ou falso: O governo Vargas (anos 1930) proibiu o ensino do idioma polonês em escolas comunitárias.",
+        opcoes: ["Verdadeiro", "Falso"],
+        correta: 0
+      },
+      {
+        pergunta: "Entre 1890 e 1914, aproximadamente quantos poloneses desembarcaram no Brasil?",
+        opcoes: ["8.000", "35.000", "96.000", "250.000"],
+        correta: 2
+      },
+      {
+        pergunta: "Sobre a culinária polonesa no Brasil, qual das opções não pertence a essa tradição?",
+        opcoes: ["Pierogi", "Bigos", "Sernik", "Feijoada"],
+        correta: 3
+      },
+      {
+        pergunta: "Qual cidade é considerada um dos maiores centros da cultura polonesa fora da Europa?",
+        opcoes: ["Porto Alegre", "São Mateus do Sul", "Curitiba", "Brasília"],
+        correta: 2
+      },
+      {
+        pergunta: "Em 1918, o Brasil foi o primeiro país da América do Sul a:",
+        opcoes: ["Criar colônias polonesas agrícolas", "Reconhecer a independência da Polônia", "Assinar acordo comercial com a Polônia", "Criar a BRASPOL"],
+        correta: 1
+      },
+      {
+        pergunta: "Quem foi um médico polonês que se destacou no Brasil no século XIX, ajudando a fundar a Academia Imperial de Medicina do RJ?",
+        opcoes: ["Pedro Luís Chernoviz", "Paweł Strzelecki", "Ricardo Lewandowski", "Norton Morozowicz"],
+        correta: 0
+      },
+      {
+        pergunta: "Verdadeiro ou falso: Hoje existem cerca de 1,5 a 2 milhões de descendentes de poloneses no Brasil, embora algumas estimativas cheguem a 5 milhões.",
+        opcoes: ["Verdadeiro", "Falso"],
+        correta: 0
+      }
+    ];
+
+    let perguntaAtual = 0;
+    let acertos = 0;
+
+    const startScreen = document.getElementById("startScreen");
+    const quizScreen = document.getElementById("quizScreen");
+    const quizDiv = document.getElementById("quiz");
+    const resultP = document.getElementById("result");
+    const nextBtn = document.getElementById("nextBtn");
+    const restartBtn = document.getElementById("restartBtn");
+
+    function iniciarQuiz() {
+      startScreen.classList.add("hidden");
+      quizScreen.classList.remove("hidden");
+      mostrarPergunta();
+    }
+
+    function mostrarPergunta() {
+      const q = perguntas[perguntaAtual];
+      quizDiv.innerHTML = `
+        <div class="question">${q.pergunta}</div>
+        <div class="options">
+          ${q.opcoes.map((op, i) => `<button onclick="verificarResposta(${i})">${op}</button>`).join("")}
+        </div>
+      `;
+      resultP.textContent = "";
+      nextBtn.classList.add("hidden");
+    }
+
+    function verificarResposta(opcao) {
+      if (opcao === perguntas[perguntaAtual].correta) {
+        resultP.textContent = "✅ Resposta correta!";
+        acertos++;
+      } else {
+        resultP.textContent = "❌ Resposta errada!";
+      }
+      nextBtn.classList.remove("hidden");
+    }
+
+    nextBtn.addEventListener("click", () => {
+      perguntaAtual++;
+      if (perguntaAtual < perguntas.length) {
+        mostrarPergunta();
+      } else {
+        mostrarResultadoFinal();
+      }
+    });
+
+    function mostrarResultadoFinal() {
+      quizDiv.innerHTML = `<p class="final-score">🏆 Você acertou ${acertos} de ${perguntas.length} perguntas!</p>`;
+      resultP.textContent = "";
+      nextBtn.classList.add("hidden");
+      restartBtn.classList.remove("hidden");
+    }
+
+    restartBtn.addEventListener("click", () => {
+      perguntaAtual = 0;
+      acertos = 0;
+      restartBtn.classList.add("hidden");
+      mostrarPergunta();
+    });
+  </script>
+</body>
+</html>
+```
